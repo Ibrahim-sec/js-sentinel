@@ -1,0 +1,48 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  js-monitor:
+    build: .
+    ports:
+      - "5001:5001"
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      - FLASK_ENV=production
+      - LOG_LEVEL=INFO
+    volumes:
+      # Persist database files
+      - ./data/database:/app/database
+      # Persist logs
+      - ./data/logs:/app/logs
+      # Persist diff files
+      - ./data/diffs:/app/static/diffs
+      # Persist content versions
+      - ./data/content_versions:/app/content_versions
+    restart: unless-stopped
+    container_name: js-monitor
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Nginx reverse proxy (for production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl  # If you want HTTPS
+    depends_on:
+      - js-monitor
+    restart: unless-stopped
+    profiles:
+      - production  # Only starts with: docker-compose --profile production up
+
+volumes:
+  js_monitor_data:
+    driver: local

@@ -1,0 +1,11 @@
+flask==2.3.3
+flask-sqlalchemy==3.0.5
+flask-cors==4.0.0
+python-dotenv==1.0.0
+apscheduler==3.10.4
+requests==2.31.0
+esprima==4.0.1
+jsbeautifier==1.14.9
+tenacity==8.2.3
+pytest==7.4.2
+pytest-flask==1.2.0

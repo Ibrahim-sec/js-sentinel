@@ -1,0 +1,100 @@
+# .dockerignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+.DS_Store
+*.sqlite
+*.db
+data/
+logs/
+static/diffs/
+content_versions/
+node_modules/
+.env.local
+.env.production
+
+# ---
+
+# .env (template - copy to create your own)
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE
+DATABASE_URL=sqlite:///./database/monitor.db
+FLASK_ENV=production
+LOG_LEVEL=INFO
+
+# ---
+
+# docker-start.sh (startup script)
+#!/bin/bash
+set -e
+
+echo "🚀 Starting JavaScript Monitor..."
+
+# Create data directories if they don't exist
+mkdir -p /app/data/{database,logs,diffs,content_versions}
+
+# Wait for any dependencies (if needed)
+echo "⏳ Initializing application..."
+
+# Start the application
+echo "✅ Starting Flask application on port 5001"
+python3 run_server.py
+
+# ---
+
+# nginx.conf (for production reverse proxy)
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream js_monitor {
+        server js-monitor:5001;
+    }
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Increase client max body size for large diff files
+        client_max_body_size 100M;
+
+        location / {
+            proxy_pass http://js_monitor;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket support (if needed in future)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+
+        # Serve static files directly
+        location /static/ {
+            alias /app/static/;
+            expires 1d;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+}

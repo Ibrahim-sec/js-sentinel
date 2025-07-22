@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Monitor Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>JavaScript Monitor Dashboard</h1>
+            <p>Monitor JavaScript files for changes and view detailed diffs</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- URL Management -->
+        <div class="card">
+            <h2>URL Management</h2>
+            
+            <!-- Tab Navigation -->
+            <div class="url-tabs">
+                <button class="tab-btn active" onclick="switchUrlTab('single')">🔗 Single URL</button>
+                <button class="tab-btn" onclick="switchUrlTab('bulk')">📋 Bulk Import</button>
+                <button class="tab-btn" onclick="switchUrlTab('file')">📁 File Upload</button>
+            </div>
+            
+            <!-- Single URL Tab -->
+            <div id="single-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="url-input">Add JavaScript URL:</label>
+                    <input type="url" id="url-input" placeholder="https://example.com/script.js">
+                </div>
+                <button class="btn" onclick="addUrl()">Add URL</button>
+            </div>
+            
+            <!-- Bulk Import Tab -->
+            <div id="bulk-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="bulk-urls">Add Multiple URLs (one per line):</label>
+                    <textarea id="bulk-urls" placeholder="https://example.com/script1.js
+        https://example.com/script2.js
+        https://example.com/script3.js"></textarea>
+                </div>
+                <div class="bulk-controls">
+                    <button class="btn" onclick="addBulkUrls()">📥 Import URLs</button>
+                    <button class="btn btn-secondary" onclick="previewBulkUrls()">👁️ Preview</button>
+                    <button class="btn btn-danger" onclick="clearBulkInput()">🗑️ Clear</button>
+                </div>
+                <div id="bulk-preview" class="bulk-preview"></div>
+            </div>
+            
+            <!-- File Upload Tab -->
+            <div id="file-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="url-file">Upload URL List (.txt file):</label>
+                    <div class="file-upload-area" ondrop="handleFileDrop(event)" ondragover="handleDragOver(event)">
+                        <input type="file" id="url-file" accept=".txt,.csv" onchange="handleFileUpload(event)">
+                        <div class="file-upload-text">
+                            <div class="upload-icon">📁</div>
+                            <div>Drag & drop a .txt file here or click to browse</div>
+                            <div class="upload-hint">One URL per line</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="file-controls">
+                    <button class="btn" onclick="processUploadedFile()">📥 Import from File</button>
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">📄 Download Template</button>
+                </div>
+                <div id="file-preview" class="bulk-preview"></div>
+            </div>
+            
+            <!-- Action Buttons (common to all tabs) -->
+            <div class="url-actions">
+                <button class="btn btn-success" onclick="loadUrls()">🔄 Refresh List</button>
+                <button class="btn btn-warning" onclick="exportUrls()">📤 Export URLs</button>
+                <button class="btn btn-danger" onclick="clearAllUrls()">🗑️ Clear All</button>
+            </div>
+            
+            <!-- URL List -->
+            <div class="url-list" id="url-list">
+                <!-- URLs will be loaded here -->
+            </div>
+        </div>
+
+            <!-- Monitoring Controls -->
+            <div class="card">
+                <h2>Monitoring Controls</h2>
+                <div class="monitoring-controls">
+                    <button class="btn btn-success" onclick="startMonitoring()">
+                        <span id="monitor-btn-text">Start Monitoring</span>
+                    </button>
+                    <button class="btn btn-danger" onclick="stopMonitoring()">Stop Monitoring</button>
+                    <button class="btn" onclick="checkNow()">Check Now</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="monitor-interval">Check Interval (minutes):</label>
+                    <input type="number" id="monitor-interval" value="5" min="1" max="1440">
+                </div>
+                
+                <div class="results-area" id="monitoring-results">
+                    Monitoring results will appear here...
+                </div>
+            </div>
+
+            <!-- Diff Viewer -->
+            <div class="card diff-viewer">
+                <h2>Recent Changes</h2>
+                <button class="btn" onclick="loadDiffs()">Refresh Diffs</button>
+                <button class="btn btn-danger" onclick="clearDiffs()">Clear All Diffs</button>
+                
+                <div class="diff-list" id="diff-list">
+                    <!-- Diffs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification container -->
+    <div id="notification" class="notification"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
